@@ -23,7 +23,7 @@ public class Player : MonoBehaviour
 
         transform.position = new Vector3 (0,0,0);
 
-        laserOffset = new Vector3(0, 0.9f, 0);
+        laserOffset = new Vector3(0, 1.01f, 0);
 
         if(spawnManager == null)
         {
