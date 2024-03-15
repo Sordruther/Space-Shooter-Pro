@@ -8,11 +8,13 @@ public class Enemy : MonoBehaviour
 
     float enemySpeed = 4f;
     private Player _player;
+    Animator anim;
     
 
     private void Start()
     {
         _player = GameObject.Find("Player").GetComponent<Player>();
+        anim = gameObject.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -37,8 +39,9 @@ public class Enemy : MonoBehaviour
             {
                 player.Damage();
             }
-            
-            Destroy(this.gameObject);
+            anim.SetTrigger("OnEnemyDeath");
+            enemySpeed = 0;
+            Destroy(this.gameObject, 2.35f);
             
         }
         if(other.tag == "Laser")
@@ -49,7 +52,9 @@ public class Enemy : MonoBehaviour
             {
                _player.AddScore(25);
             }
-            Destroy(this.gameObject);
+            anim.SetTrigger("OnEnemyDeath");
+            enemySpeed = 0;
+            Destroy(this.gameObject, 2.35f);
         }
 
     }
