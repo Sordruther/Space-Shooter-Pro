@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class Laser : MonoBehaviour
 {   
@@ -13,7 +14,15 @@ public class Laser : MonoBehaviour
 
         if(transform.position.y >= 6.7){
             
-            Destroy(gameObject);
+            if(transform.parent != null)
+            {
+                Destroy(transform.parent.gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+            
         }
     }
 

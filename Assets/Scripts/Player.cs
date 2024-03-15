@@ -1,11 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField]
+    bool isSpeedUpActive = false, isTripleShotActive = false, shielded = false;
+
     private Vector3 laserOffset;
     public float speed = 5f;
+    float speedMultiplier = 1.5f;
+    [SerializeField]
+    float buffTime = 5f;
     private float horizontalInput;
     [SerializeField]
     private int lives = 3;
@@ -15,15 +22,26 @@ public class Player : MonoBehaviour
     private float canFire = -1f;
     [SerializeField]
     private GameObject laserPrefab;
+    [SerializeField]
+    private GameObject tripleShotPrefab;
+    [SerializeField]
+    private GameObject shieldObj;
     private SpawnManager spawnManager;
+    private UIManager uiManager;
+    [SerializeField]
+    private int score;
 
     void Start()
     {
         spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
 
+        uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
+
         transform.position = new Vector3 (0,0,0);
 
         laserOffset = new Vector3(0, 1.01f, 0);
+
+        shieldObj.SetActive(false);
 
         if(spawnManager == null)
         {
@@ -47,8 +65,8 @@ public class Player : MonoBehaviour
         verticalInput = Input.GetAxis("Vertical");
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
-        transform.Translate(direction * speed * Time.deltaTime);
 
+        transform.Translate(direction * speed * Time.deltaTime);
         transform.position = new Vector3 (transform.position.x, Mathf.Clamp(transform.position.y, -4f, 6), 0);
         
         if (transform.position.x > 11.3f)
@@ -63,18 +81,74 @@ public class Player : MonoBehaviour
     void Shoot()
     {
         canFire = Time.time + fireRate;
-        Instantiate(laserPrefab, transform.position + laserOffset, Quaternion.identity);
+
+        if(isTripleShotActive == true)
+        {
+            Instantiate(tripleShotPrefab, transform.position, Quaternion.identity);
+        }
+        else
+        {
+            Instantiate(laserPrefab, transform.position + laserOffset, Quaternion.identity);
+        }
     }
 
     public void Damage()
-    {
+    {   
+        if (shielded == true)
+        {
+            shielded = false;
+            shieldObj.SetActive(false);
+            return;
+        }
+        
         lives --;
+
+        uiManager.UpdateLives(lives);
 
         if(lives < 1)
         {
             spawnManager.OnPlayerDeath();
-
             Destroy(this.gameObject);
         }
     }
+
+    public void TripleShotActive()
+    {
+        isTripleShotActive = true;
+        StartCoroutine(TripleShotPowerDown());
+    }
+    private IEnumerator TripleShotPowerDown()
+    {
+        yield return new WaitForSeconds(buffTime);
+        isTripleShotActive = false;
+    }
+
+    public void SpeedUpActive()
+    {
+        isSpeedUpActive = true;
+        speed *= speedMultiplier;
+        StartCoroutine(SpeedDown());
+    }
+
+    public void ShieldActive()
+    {
+        shieldObj.SetActive(true);
+        shielded = true;
+    }
+
+    public void AddScore(int points)
+    {
+        score += points;
+        uiManager.UpdateScore(score);
+    }
+
+    private IEnumerator SpeedDown()
+    {
+        yield return new WaitForSeconds(buffTime);
+        speed /= speedMultiplier;
+        isSpeedUpActive = false;
+    }
+
+    
+
 }
