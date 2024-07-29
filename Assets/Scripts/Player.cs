@@ -25,11 +25,14 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject tripleShotPrefab;
     [SerializeField]
-    private GameObject shieldObj;
+    private GameObject shieldObj, rightEngObj, leftEngObj;
     private SpawnManager spawnManager;
     private UIManager uiManager;
     [SerializeField]
     private int score;
+    [SerializeField]
+    private AudioClip laserSound;
+    private AudioSource audioSource;
 
     void Start()
     {
@@ -37,15 +40,28 @@ public class Player : MonoBehaviour
 
         uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
 
+        audioSource = GetComponent<AudioSource>();
+
         transform.position = new Vector3 (0,0,0);
 
         laserOffset = new Vector3(0, 1.01f, 0);
 
         shieldObj.SetActive(false);
+        rightEngObj.SetActive(false);
+        leftEngObj.SetActive(false);
 
         if(spawnManager == null)
         {
             Debug.Log("Spawn Manager is Null");
+        }
+
+        if(audioSource == null)
+        {
+            Debug.Log("Audio Source is NULL");
+        }
+        else
+        {
+            audioSource.clip = laserSound;
         }
     }
 
@@ -90,6 +106,7 @@ public class Player : MonoBehaviour
         {
             Instantiate(laserPrefab, transform.position + laserOffset, Quaternion.identity);
         }
+        audioSource.Play();
     }
 
     public void Damage()
@@ -102,6 +119,16 @@ public class Player : MonoBehaviour
         }
         
         lives --;
+
+        if(lives == 2)
+        {
+            rightEngObj.SetActive(true);
+        }
+
+        else if(lives == 1)
+        {
+            leftEngObj.SetActive(true);
+        }
 
         uiManager.UpdateLives(lives);
 
